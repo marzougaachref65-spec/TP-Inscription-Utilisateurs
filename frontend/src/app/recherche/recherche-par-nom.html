@@ -1,0 +1,46 @@
+<div class="container mt-4">
+  <h2 class="mb-4">Recherche des joueurs par nom</h2>
+
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <form class="form-inline">
+        <div class="form-group mx-sm-3 mb-2 mt-2">
+          <label class="form-label">Nom Joueur</label>
+          <input type="text" class="form-control" [(ngModel)]="nomProduit" name="nomProduit"
+                 #nomInput (keyup)="onKeyUp(nomInput.value)">
+          <button type="button" class="btn btn-primary mt-2" (click)="rechercherProds()">Rechercher</button>
+        </div>
+      </form>
+
+      <div class="form-group mx-sm-3 mb-2 mt-2">
+        <label class="form-label">Nom Produit en tapant (pipe)</label>
+        <input class="form-control" #nom [(ngModel)]="searchTerm" name="searchTerm">
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <table class="table table-striped">
+        <thead>
+          <tr><th>Id</th><th>Nom</th><th>Prénom</th><th>Poste</th><th>Âge</th><th>Équipe</th><th>Auteur</th></tr>
+        </thead>
+        <tbody>
+          @for (produit of produits | searchFilter: searchTerm; track produit.id) {
+            <tr>
+              <td>{{ produit.id }}</td>
+              <td>{{ produit.nom }}</td>
+              <td>{{ produit.prenom }}</td>
+              <td>{{ produit.poste }}</td>
+              <td>{{ produit.age }}</td>
+              <td>{{ produit.equipe?.nom ?? 'PAS D EQUIPE' }}</td>
+              <td>{{ produit.auteur?.nom }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="7" class="text-center text-muted py-4">Aucun joueur trouvé !</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

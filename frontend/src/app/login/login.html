@@ -1,0 +1,31 @@
+<div class="container mt-5">
+  <div class="row justify-content-md-center">
+    <div class="col-md-4">
+      @if (erreur === 1) {
+        <div class="alert alert-danger">
+          <strong>Login ou mot de passe erronés..</strong>
+        </div>
+      }
+
+      <form class="bg-white p-4 rounded shadow-sm" (ngSubmit)="onLoggedin()">
+        <h2 class="mb-4">Connexion</h2>
+
+        <div class="form-group mb-3">
+          <label class="form-label">Nom Utilisateur :</label>
+          <input type="text" name="username" class="form-control" [(ngModel)]="user.username" required>
+        </div>
+
+        <div class="form-group mb-3">
+          <label class="form-label">Mot de passe :</label>
+          <input type="password" name="password" class="form-control" [(ngModel)]="user.password" required>
+        </div>
+
+        <button type="submit" class="btn btn-lg btn-primary w-100">Connexion</button>
+
+        <p class="text-muted mt-3 small mb-0">
+          Comptes : <strong>admin / 123</strong> (ADMIN) ou <strong>joueur / 123</strong> (USER)
+        </p>
+      </form>
+    </div>
+  </div>
+</div>

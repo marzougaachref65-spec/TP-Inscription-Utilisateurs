@@ -1,0 +1,13 @@
+/* Styles globaux de l'application */
+body {
+  background-color: #f5f6f8;
+}
+
+h2 {
+  color: #212529;
+}
+
+.table td,
+.table th {
+  vertical-align: middle;
+}

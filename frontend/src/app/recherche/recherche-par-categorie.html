@@ -1,0 +1,48 @@
+<div class="container mt-4">
+  <h2 class="mb-4">Recherche des joueurs par équipe</h2>
+
+  @if (messageErreur) {
+    <div class="alert alert-danger">{{ messageErreur }}</div>
+  }
+
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <div class="col-sm-4 col-md-4 col-lg-4 mb-2">
+        <label class="form-label">Catégories (équipes)</label>
+        <select class="form-control form-control-lg" id="idCat" name="idCat"
+                [(ngModel)]="IdCategorie" (change)="onChange()">
+          @for (cat of categories; track cat.id) {
+            <option value="{{ cat.id }}">{{ cat.nom }}</option>
+          }
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Id</th><th>Nom</th><th>Prénom</th><th>Poste</th><th>Âge</th><th>Équipe</th><th>Auteur</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (produit of produits; track produit.id) {
+            <tr>
+              <td>{{ produit.id }}</td>
+              <td>{{ produit.nom }}</td>
+              <td>{{ produit.prenom }}</td>
+              <td>{{ produit.poste }}</td>
+              <td>{{ produit.age }}</td>
+              <td>
+                @if (produit.equipe) { {{ produit.equipe.nom }} } @else { PAS D'ÉQUIPE }
+              </td>
+              <td>{{ produit.auteur?.nom }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

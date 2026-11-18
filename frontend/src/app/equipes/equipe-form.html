@@ -1,0 +1,39 @@
+<div class="container mt-4" style="max-width: 640px;">
+  <h2 class="mb-4">{{ modeEdition ? 'Modifier une équipe' : 'Ajouter une équipe' }}</h2>
+
+  @if (messageErreur) {
+    <div class="alert alert-danger">{{ messageErreur }}</div>
+  }
+
+  <form class="bg-white p-4 rounded shadow-sm" #f="ngForm" (ngSubmit)="enregistrer()">
+    @if (modeEdition) {
+      <div class="mb-3">
+        <label class="form-label">ID Équipe</label>
+        <input readonly type="text" class="form-control" name="id" [ngModel]="equipe.id">
+      </div>
+    }
+
+    <div class="mb-3">
+      <label class="form-label">Nom de l'équipe</label>
+      <input class="form-control" name="nom" [(ngModel)]="equipe.nom" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Ville</label>
+      <input class="form-control" name="ville" [(ngModel)]="equipe.ville" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Pays</label>
+      <input class="form-control" name="pays" [(ngModel)]="equipe.pays" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Date de création</label>
+      <input type="date" class="form-control" name="dateCreation" [(ngModel)]="equipe.dateCreation" required>
+    </div>
+
+    <button type="submit" class="btn btn-success" [disabled]="f.invalid">Enregistrer</button>
+    <a class="btn btn-secondary ms-2" routerLink="/equipes">Annuler</a>
+  </form>
+</div>

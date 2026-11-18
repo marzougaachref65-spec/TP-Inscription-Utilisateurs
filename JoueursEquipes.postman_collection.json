@@ -1,0 +1,150 @@
+{
+  "info": {
+    "name": "JoueursEquipes - Ateliers Spring Boot & Angular",
+    "description": "Collection prete a importer dans Postman. Base : http://localhost:8080/joueurs. Entites : Joueur, Equipe, Auteur. Forte authentification JWT : lancer d'abord '00 - Login JWT' (admin/123), le token est stocke dans la variable jwtToken.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080/joueurs" },
+    { "key": "apiUrl", "value": "{{baseUrl}}/api" },
+    { "key": "restJoueurs", "value": "{{baseUrl}}/restJoueurs" },
+    { "key": "restEquipes", "value": "{{baseUrl}}/restEquipes" },
+    { "key": "restAuteurs", "value": "{{baseUrl}}/restAuteurs" },
+    { "key": "jwtToken", "value": "" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{jwtToken}}", "type": "string" }
+    ]
+  },
+  "item": [
+    {
+      "name": "00 - Authentification JWT (Ateliers 13-15)",
+      "item": [
+        {
+          "name": "Login JWT (admin/123)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    const token = pm.response.headers.get('Authorization') || data.token;",
+                  "    pm.collectionVariables.set('jwtToken', token);",
+                  "    console.log('JWT stocke dans jwtToken');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "auth": { "type": "noauth" },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"123\"\n}"
+            },
+            "url": "{{baseUrl}}/login"
+          }
+        },
+        {
+          "name": "Login JWT (joueur/123 - lecture seule)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "auth": { "type": "noauth" },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"joueur\",\n  \"password\": \"123\"\n}"
+            },
+            "url": "{{baseUrl}}/login"
+          }
+        },
+        { "name": "Users/all - reserve ADMIN (Atelier 14)", "request": { "method": "GET", "header": [], "url": "{{apiUrl}}/users/all" } }
+      ]
+    },
+    {
+      "name": "01 - Joueurs (REST controller)",
+      "item": [
+        { "name": "Liste des joueurs", "request": { "method": "GET", "header": [], "url": "{{apiUrl}}/joueurs" } },
+        { "name": "Joueur par id", "request": { "method": "GET", "header": [], "url": "{{apiUrl}}/joueurs/1" } },
+        {
+          "name": "Creer un joueur",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Ben Romdhane\",\n  \"prenom\": \"Mohamed\",\n  \"age\": 26,\n  \"poste\": \"Milieu\",\n  \"numeroMaillot\": 8,\n  \"equipe\": { \"id\": 1 },\n  \"auteur\": { \"id\": 1 }\n}"
+            },
+            "url": "{{apiUrl}}/joueurs"
+          }
+        },
+        {
+          "name": "Modifier un joueur",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"nom\": \"NomModifie\",\n  \"prenom\": \"PrenomModifie\",\n  \"age\": 25,\n  \"poste\": \"Milieu\",\n  \"numeroMaillot\": 10,\n  \"equipe\": { \"id\": 1 },\n  \"auteur\": { \"id\": 1 }\n}"
+            },
+            "url": "{{apiUrl}}/joueurs"
+          }
+        },
+        { "name": "Supprimer un joueur", "request": { "method": "DELETE", "header": [], "url": "{{apiUrl}}/joueurs/1" } },
+        { "name": "Joueurs d'une equipe", "request": { "method": "GET", "header": [], "url": "{{apiUrl}}/joueurs/equipe/1" } },
+        { "name": "Joueurs d'un auteur", "request": { "method": "GET", "header": [], "url": "{{apiUrl}}/joueurs/auteur/1" } },
+        { "name": "Recherche par nom (Atelier 07)", "request": { "method": "GET", "header": [], "url": "{{apiUrl}}/joueurs/nom/Ben" } }
+      ]
+    },
+    {
+      "name": "02 - Equipes (REST controller)",
+      "item": [
+        { "name": "Liste des equipes", "request": { "method": "GET", "header": [], "url": "{{apiUrl}}/equipes" } },
+        { "name": "Equipe par id", "request": { "method": "GET", "header": [], "url": "{{apiUrl}}/equipes/1" } },
+        {
+          "name": "Creer une equipe",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nom\": \"Nouvelle Equipe\",\n  \"ville\": \"Tunis\",\n  \"pays\": \"Tunisie\",\n  \"dateCreation\": \"2020-01-01\"\n}" },
+            "url": "{{apiUrl}}/equipes"
+          }
+        },
+        { "name": "Supprimer une equipe", "request": { "method": "DELETE", "header": [], "url": "{{apiUrl}}/equipes/99" } }
+      ]
+    },
+    {
+      "name": "03 - Auteurs (REST controller)",
+      "item": [
+        { "name": "Liste des auteurs", "request": { "method": "GET", "header": [], "url": "{{apiUrl}}/auteurs" } },
+        { "name": "Auteur par id", "request": { "method": "GET", "header": [], "url": "{{apiUrl}}/auteurs/1" } },
+        {
+          "name": "Creer un auteur",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nom\": \"Dupont\",\n  \"prenom\": \"Jean\",\n  \"nationalite\": \"Francaise\"\n}" },
+            "url": "{{apiUrl}}/auteurs"
+          }
+        },
+        { "name": "Recherche auteur par nom", "request": { "method": "GET", "header": [], "url": "{{apiUrl}}/auteurs/nom/kar" } }
+      ]
+    },
+    {
+      "name": "04 - Spring Data REST (Atelier 03 / 09)",
+      "item": [
+        { "name": "Joueurs HAL", "request": { "method": "GET", "header": [], "url": "{{restJoueurs}}" } },
+        { "name": "Joueurs HAL - projection", "request": { "method": "GET", "header": [], "url": "{{restJoueurs}}?projection=nomJoueur" } },
+        { "name": "Joueurs HAL - recherche", "request": { "method": "GET", "header": [], "url": "{{restJoueurs}}/search/findByNomContains?nom=Ben" } },
+        { "name": "Equipes HAL (utilise par Angular)", "request": { "method": "GET", "header": [], "url": "{{restEquipes}}" } },
+        { "name": "Auteurs HAL", "request": { "method": "GET", "header": [], "url": "{{restAuteurs}}?projection=nomAuteur" } }
+      ]
+    }
+  ]
+}

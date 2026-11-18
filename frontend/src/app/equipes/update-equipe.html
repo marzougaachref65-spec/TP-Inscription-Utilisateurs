@@ -1,0 +1,35 @@
+<form class="bg-white p-3 rounded shadow-sm" #f="ngForm">
+  <h5 class="mb-3">{{ ajout ? 'Ajouter une équipe' : 'Modifier une équipe' }}</h5>
+
+  <div [hidden]="ajout" class="mb-2">
+    <label class="form-label">ID Équipe</label>
+    <input type="text" class="form-control w-25" name="id" [ngModel]="categorie.id" readonly>
+  </div>
+
+  <div class="mb-2">
+    <label class="form-label">Nom équipe</label>
+    <input type="text" class="form-control" name="nomEquipe"
+           [(ngModel)]="categorie.nom" placeholder="Entrez un nom d'équipe..." required>
+  </div>
+
+  <div class="mb-2">
+    <label class="form-label">Ville</label>
+    <input type="text" class="form-control" name="ville" [(ngModel)]="categorie.ville" required>
+  </div>
+
+  <div class="mb-2">
+    <label class="form-label">Pays</label>
+    <input type="text" class="form-control" name="pays" [(ngModel)]="categorie.pays" required>
+  </div>
+
+  <div class="mb-2">
+    <label class="form-label">Date de création</label>
+    <input type="date" class="form-control" name="dateCreation" [(ngModel)]="categorie.dateCreation" required>
+  </div>
+
+  <button type="submit" [disabled]="f.invalid" class="btn btn-success"
+          (click)="saveCategorie()">
+    {{ ajout ? 'Ajouter' : 'Modifier' }}
+  </button>
+  <button type="button" class="btn btn-outline-secondary ms-2" (click)="ajout = true">Nouveau</button>
+</form>

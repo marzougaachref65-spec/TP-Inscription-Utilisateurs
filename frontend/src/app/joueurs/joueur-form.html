@@ -1,0 +1,74 @@
+<div class="container mt-4" style="max-width: 760px;">
+  <h2 class="mb-4">{{ modeEdition ? 'Modifier un joueur' : 'Ajouter un joueur' }}</h2>
+
+  @if (messageErreur) {
+    <div class="alert alert-danger">{{ messageErreur }}</div>
+  }
+
+  <form class="bg-white p-4 rounded shadow-sm" #f="ngForm" (ngSubmit)="enregistrer()">
+    @if (modeEdition) {
+      <div class="mb-3">
+        <label class="form-label">ID Joueur</label>
+        <!-- Atelier 03 : champ ID rendu read-only en modification -->
+        <input readonly type="text" class="form-control" name="id" [ngModel]="joueur.id">
+      </div>
+    }
+
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Nom</label>
+        <input class="form-control" name="nom" [(ngModel)]="joueur.nom" required>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Prénom</label>
+        <input class="form-control" name="prenom" [(ngModel)]="joueur.prenom" required>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Poste</label>
+        <select class="form-select" name="poste" [(ngModel)]="joueur.poste" required>
+          <option value="">-- Choisir un poste --</option>
+          <option value="Gardien">Gardien</option>
+          <option value="Défenseur">Défenseur</option>
+          <option value="Milieu">Milieu</option>
+          <option value="Attaquant">Attaquant</option>
+        </select>
+      </div>
+      <div class="col-md-3 mb-3">
+        <label class="form-label">Âge</label>
+        <input type="number" min="10" max="100" class="form-control" name="age" [(ngModel)]="joueur.age" required>
+      </div>
+      <div class="col-md-3 mb-3">
+        <label class="form-label">N° maillot</label>
+        <input type="number" min="1" class="form-control" name="numeroMaillot"
+               [(ngModel)]="joueur.numeroMaillot" required>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Équipe</label>
+        <select class="form-select" name="equipeId" [(ngModel)]="equipeId" required>
+          <option [ngValue]="null">-- Choisir une équipe --</option>
+          @for (equipe of equipes; track equipe.id) {
+            <option [ngValue]="equipe.id">{{ equipe.nom }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Auteur</label>
+        <select class="form-select" name="auteurId" [(ngModel)]="auteurId">
+          <option [ngValue]="null">-- Sans auteur --</option>
+          @for (auteur of auteurs; track auteur.id) {
+            <option [ngValue]="auteur.id">{{ auteur.nom }} {{ auteur.prenom }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-success" [disabled]="f.invalid">Enregistrer</button>
+    <a class="btn btn-secondary ms-2" routerLink="/joueurs">Annuler</a>
+  </form>
+</div>

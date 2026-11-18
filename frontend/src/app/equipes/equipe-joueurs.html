@@ -1,0 +1,54 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">
+      Joueurs de l'équipe
+      @if (equipe) {
+        <span class="text-primary">{{ equipe.nom }}</span>
+      }
+    </h2>
+    <a class="btn btn-secondary" routerLink="/equipes">&larr; Retour aux équipes</a>
+  </div>
+
+  @if (equipe) {
+    <p class="text-muted">
+      Ville : {{ equipe.ville }} — Pays : {{ equipe.pays }} — Créée le {{ equipe.dateCreation }}
+    </p>
+  }
+
+  @if (messageErreur) {
+    <div class="alert alert-danger">{{ messageErreur }}</div>
+  }
+
+  <div class="table-responsive shadow-sm bg-white rounded">
+    <table class="table table-striped table-hover mb-0">
+      <thead class="table-dark">
+        <tr>
+          <th>ID</th>
+          <th>Nom</th>
+          <th>Prénom</th>
+          <th>Poste</th>
+          <th>Âge</th>
+          <th>N°</th>
+          <th>Auteur</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (joueur of joueurs; track joueur.id) {
+          <tr>
+            <td>{{ joueur.id }}</td>
+            <td>{{ joueur.nom }}</td>
+            <td>{{ joueur.prenom }}</td>
+            <td>{{ joueur.poste }}</td>
+            <td>{{ joueur.age }}</td>
+            <td>{{ joueur.numeroMaillot }}</td>
+            <td>{{ joueur.auteur?.nom }} {{ joueur.auteur?.prenom }}</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="7" class="text-center text-muted py-4">Aucun joueur dans cette équipe.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -1,0 +1,34 @@
+<div class="container mt-4" style="max-width: 640px;">
+  <h2 class="mb-4">{{ modeEdition ? "Modifier un auteur" : "Ajouter un auteur" }}</h2>
+
+  @if (messageErreur) {
+    <div class="alert alert-danger">{{ messageErreur }}</div>
+  }
+
+  <form class="bg-white p-4 rounded shadow-sm" #f="ngForm" (ngSubmit)="enregistrer()">
+    @if (modeEdition) {
+      <div class="mb-3">
+        <label class="form-label">ID Auteur</label>
+        <input readonly type="text" class="form-control" name="id" [ngModel]="auteur.id">
+      </div>
+    }
+
+    <div class="mb-3">
+      <label class="form-label">Nom</label>
+      <input class="form-control" name="nom" [(ngModel)]="auteur.nom" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Prénom</label>
+      <input class="form-control" name="prenom" [(ngModel)]="auteur.prenom" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Nationalité</label>
+      <input class="form-control" name="nationalite" [(ngModel)]="auteur.nationalite" required>
+    </div>
+
+    <button type="submit" class="btn btn-success" [disabled]="f.invalid">Enregistrer</button>
+    <a class="btn btn-secondary ms-2" routerLink="/auteurs">Annuler</a>
+  </form>
+</div>

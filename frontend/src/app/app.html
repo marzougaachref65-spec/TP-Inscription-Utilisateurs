@@ -1,0 +1,54 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold" routerLink="/">⚽ Joueurs &amp; Équipes</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+            data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+            aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/joueurs" routerLinkActive="active">Joueurs</a>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarGestion" role="button"
+             data-bs-toggle="dropdown" aria-expanded="false">Gestion</a>
+          <ul class="dropdown-menu" aria-labelledby="navbarGestion">
+            <li><a class="dropdown-item" routerLink="/joueurs">Lister les joueurs</a></li>
+            @if (authService.isAdmin()) {
+              <li><a class="dropdown-item" routerLink="/joueurs/new">Ajouter un joueur</a></li>
+            }
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" routerLink="/equipes">Gestion des équipes</a></li>
+            <li><a class="dropdown-item" routerLink="/auteurs">Gestion des auteurs</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" routerLink="/rechercheParCategorie">Recherche par équipe</a></li>
+            <li><a class="dropdown-item" routerLink="/rechercheParNom">Recherche par nom</a></li>
+          </ul>
+        </li>
+      </ul>
+
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        @if (!authService.isloggedIn) {
+          <li class="nav-item"><a class="nav-link" routerLink="/login">Login</a></li>
+        } @else {
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarUser" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">
+              [{{ authService.loggedUser }}]
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarUser">
+              <li><span class="dropdown-item-text text-muted">{{ authService.roles }}</span></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" (click)="onLogout()">Logout</a></li>
+            </ul>
+          </li>
+        }
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<router-outlet />

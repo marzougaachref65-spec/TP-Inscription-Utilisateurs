@@ -1,0 +1,89 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Liste des joueurs</h2>
+    @if (authService.isAdmin()) {
+      <a class="btn btn-primary" routerLink="/joueurs/new">+ Nouveau joueur</a>
+    }
+  </div>
+
+  @if (messageErreur) {
+    <div class="alert alert-danger">{{ messageErreur }}</div>
+  }
+
+  <!-- Atelier 07 : keyup + recherche API -->
+  <div class="row g-2 align-items-center mb-3">
+    <div class="col-12 col-md-5">
+      <input #searchTerm type="search" class="form-control"
+             placeholder="Rechercher en tapant..." name="recherche"
+             [(ngModel)]="recherche" (keyup)="onKeyUp(searchTerm.value)">
+    </div>
+    <div class="col-auto">
+      <button class="btn btn-outline-primary" (click)="rechercherParApi()">Rechercher (API)</button>
+    </div>
+    <div class="col-12 col-md-5 text-md-end text-muted small">
+      {{ joueursAffiches.length }} joueur(s) affiché(s) sur {{ allJoueurs.length }}
+    </div>
+  </div>
+
+  <div class="table-responsive shadow-sm bg-white rounded">
+    <table class="table table-striped table-hover mb-0">
+      <thead class="table-dark">
+        <tr>
+          <th>ID</th>
+          <th role="button" (click)="trierPar('nom')">Nom{{ indicateurTri('nom') }}</th>
+          <th role="button" (click)="trierPar('prenom')">Prénom{{ indicateurTri('prenom') }}</th>
+          <th role="button" (click)="trierPar('poste')">Poste{{ indicateurTri('poste') }}</th>
+          <th role="button" (click)="trierPar('age')">Âge{{ indicateurTri('age') }}</th>
+          <th role="button" (click)="trierPar('numeroMaillot')">N°{{ indicateurTri('numeroMaillot') }}</th>
+          <th role="button" (click)="trierPar('equipe')">Équipe{{ indicateurTri('equipe') }}</th>
+          <th role="button" (click)="trierPar('auteur')">Auteur{{ indicateurTri('auteur') }}</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (joueur of joueursAffiches; track joueur.id) {
+          <tr>
+            <td>{{ joueur.id }}</td>
+            <td>{{ joueur.nom }}</td>
+            <td>{{ joueur.prenom }}</td>
+            <td>{{ joueur.poste }}</td>
+            <td>{{ joueur.age }}</td>
+            <td>{{ joueur.numeroMaillot }}</td>
+            <td>
+              @if (joueur.equipe) {
+                <span class="badge text-bg-secondary">{{ joueur.equipe.nom }}</span>
+              } @else { <span class="text-muted">—</span> }
+            </td>
+            <td>
+              @if (joueur.auteur) {
+                <span class="badge text-bg-info">{{ joueur.auteur.nom }} {{ joueur.auteur.prenom }}</span>
+              } @else { <span class="text-muted">—</span> }
+            </td>
+            <td class="text-end text-nowrap">
+              @if (authService.isAdmin()) {
+                <a class="btn btn-sm btn-outline-primary me-1" [routerLink]="['/joueurs/edit', joueur.id]">
+                  Modifier
+                </a>
+                <button class="btn btn-sm btn-outline-danger" (click)="supprimerJoueur(joueur.id!)">
+                  Supprimer
+                </button>
+              } @else {
+                <span class="text-muted">Lecture seule</span>
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="9" class="text-center text-muted py-4">
+              @if (recherche) {
+                Aucun joueur ne correspond à « {{ recherche }} ».
+              } @else {
+                Aucun joueur enregistré.
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
