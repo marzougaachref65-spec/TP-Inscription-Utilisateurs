@@ -40,8 +40,8 @@ public class UserDataInitializer implements CommandLineRunner {
 		Role adminRole = getOrCreateRole("ADMIN");
 		Role userRole = getOrCreateRole("USER");
 
-		createUser("admin", "123", List.of(adminRole, userRole));
-		createUser("joueur", "123", List.of(userRole));
+		createUser("admin", "123", "admin@joueurs.local", List.of(adminRole, userRole));
+		createUser("joueur", "123", "joueur@joueurs.local", List.of(userRole));
 	}
 
 	private Role getOrCreateRole(String libelle) {
@@ -52,12 +52,19 @@ public class UserDataInitializer implements CommandLineRunner {
 		return role;
 	}
 
-	private void createUser(String username, String password, List<Role> roles) {
-		if (userRepository.findByUsername(username) != null) {
+	private void createUser(String username, String password, String email, List<Role> roles) {
+		User existing = userRepository.findByUsername(username);
+		if (existing != null) {
+			// Les comptes deja crees avant l'ajout du champ email restent valides.
+			if (existing.getEmail() == null) {
+				existing.setEmail(email);
+				userRepository.save(existing);
+			}
 			return;
 		}
 		User user = new User();
 		user.setUsername(username);
+		user.setEmail(email);
 		user.setPassword(passwordEncoder.encode(password));
 		user.setEnabled(true);
 		user.setRoles(new ArrayList<>(roles));

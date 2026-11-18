@@ -2,8 +2,9 @@
 
 Projet Full Stack réalisé dans le dossier `C:\Users\Dell\JoueursEquipes`.
 Les 12 ateliers initiaux (Spring Boot **01–03** et Angular **01, 02, 03, 04, 05, 07, 08, 09, 16**),
-puis les 5 ateliers JWT/Sécurité (Spring **13, 14, 15** et Angular **16bis, 17**), ont été adaptés
-au domaine demandé : **Joueur**, **Equipe** et **Auteur**.
+puis les 5 ateliers JWT/Sécurité (Spring **13, 14, 15** et Angular **16bis, 17**), et enfin le TP
+**« Inscription des Utilisateurs avec Spring Boot et Angular » (2025)** ont été adaptés au domaine
+demandé : **Joueur**, **Equipe** et **Auteur**.
 
 > Ouvrez directement le projet dans IntelliJ / votre éditeur : le backend, le frontend,
 > les données de démonstration, les tests et la documentation sont déjà en place.
@@ -22,13 +23,15 @@ JoueursEquipes/
 │       │   ├── JoueursEquipesApplication.java
 │       │   ├── DatabaseSeeder.java          → données de démonstration
 │       │   ├── UserDataInitializer.java     → comptes admin / joueur (Atelier 13)
-│       │   ├── entities/                    → Joueur, Equipe, Auteur, User, Role + projections
-│       │   ├── repos/                       → 5 repositories (dont User / Role)
+│       │   ├── entities/                    → Joueur, Equipe, Auteur, User, Role, VerificationToken
+│       │   ├── repos/                       → 6 repositories (dont User / Role / VerificationToken)
+│       │   ├── register/                    → RegistrationRequest (validation backend)
 │       │   ├── service/                     → interfaces + implémentations
-│       │   ├── restcontrollers/             → contrôleurs REST + LoginController + /api/users/all
+│       │   ├── util/                        → EmailSender / EmailService (SMTP)
+│       │   ├── restcontrollers/             → contrôleurs REST + Login + Register + /api/users/all
 │       │   ├── security/                    → JWTAuthenticationFilter, JWTAuthorizationFilter,
 │       │   │                                  SecurityConfig, MyUserDetailsService, SecParams
-│       │   └── exceptions/                  → gestion 400 / 404 / 409
+│       │   └── exceptions/                  → gestion 400 / 404 / 409 / erreurs d'inscription
 │       ├── main/resources/application.properties
 │       └── test/java/...                    → 20 tests JUnit
 ├── frontend/    → Angular 22 (zoneless) + Bootstrap 5
@@ -39,6 +42,7 @@ JoueursEquipes/
 │           │                 → services/token.interceptor.ts (Atelier 17)
 │           ├── joueurs/     equipes/       auteurs/
 │           ├── recherche/   login/         forbidden/
+│           ├── register/    verifEmail/    → formulaire + code à 6 chiffres
 │           ├── app.routes.ts  app.config.ts  app.ts  app.html
 ├── README.md
 ├── COMPTE-RENDU-TP.md
@@ -54,8 +58,9 @@ JoueursEquipes/
 | **Equipe** | `id`, `nom`, `ville`, `pays`, `dateCreation`, `joueurs` |
 | **Joueur** | `id`, `nom`, `prenom`, `age`, `poste`, `numeroMaillot`, `equipe`, `auteur` |
 | **Auteur** | `id`, `nom`, `prenom`, `nationalite`, `joueurs` |
-| **User** (Atelier 13) | `userId`, `username`, `password` (BCrypt, jamais renvoyé en JSON), `enabled`, `roles` |
+| **User** (Atelier 13 + TP 2025) | `userId`, `username`, `email`, `password` (BCrypt, jamais renvoyé en JSON), `enabled`, `roles` |
 | **Role** (Atelier 13) | `id`, `role` (`ADMIN` ou `USER`) |
+| **VerificationToken** (TP 2025) | `id`, `token` (6 chiffres), `expirationTime` (15 min), `user` |
 
 Relations :
 - une **Equipe** a plusieurs **Joueurs** (`@OneToMany`) ; un **Joueur** appartient à une seule **Equipe** (`@ManyToOne`).
@@ -111,6 +116,13 @@ Les comptes sont désormais stockés en base (`app_user` / `app_role`) avec des 
 **LocalStorage** sous la clé `jwt`. Le menu contextuel (dropdown) et la page `/app-forbidden`
 restent en place.
 
+### Inscription (TP 2025)
+
+Un nouveau compte créé depuis `/register` reçoit le rôle **USER** par défaut et reste
+**désactivé** tant que le code à 6 chiffres n’a pas été validé via `/verifyEmail/{code}`.
+Le code est valable **15 minutes**. Le login d’un compte non activé renvoie **403** avec
+`{"errorCause":"disabled",...}`.
+
 > **PowerShell** : utiliser `npm.cmd`, `ng.cmd` et `.\mvnw.cmd` (les scripts `.ps1` peuvent être bloqués).
 >
 > **Angular 22 est zoneless** : chaque `subscribe()` appelle `ChangeDetectorRef.markForCheck()`
@@ -141,6 +153,17 @@ Collection Postman prête à importer : [`JoueursEquipes.postman_collection.json
 |---|---|---|---|
 | POST | `/login` | Génère le JWT (`Authorization` + corps `{token, username, roles}`) | public |
 | GET | `/api/users/all` | Liste des utilisateurs (API protégée de l'atelier 14) | `ADMIN` |
+
+### Inscription / validation d'email (TP 2025) — base `http://localhost:8080/joueurs`
+
+| Méthode | URL | Description | Accès |
+|---|---|---|---|
+| POST | `/register` | Crée un compte `USER` désactivé et envoie le code par email | public |
+| GET | `/verifyEmail/{code}` | Valide le code à 6 chiffres (15 min) et active le compte | public |
+| POST | `/api/users/register` | Alias de `/register` | public |
+| GET | `/api/users/verifyEmail/{code}` | Alias de `/verifyEmail/{code}` | public |
+
+Corps `/register` : `{"username":"nouveau","email":"nouveau@joueurs.local","password":"secret123"}`.
 
 Toutes les autres URL ci-dessous nécessitent l'en-tête `Authorization: Bearer <jwt>`.
 Les lectures (`GET`) sont autorisées pour `ADMIN` et `USER` ; les écritures (`POST`, `PUT`,
@@ -223,6 +246,7 @@ Invoke-RestMethod -Uri "http://localhost:8080/joueurs/api/joueurs" -Headers $hea
 | Spring **15** | Sécurisation des API REST | `SecurityConfig` : stateless, CORS, `requestMatchers`, lecture `ADMIN`/`USER`, écriture `ADMIN` |
 | Angular **16bis** | Consommation des API sécurisées | `AuthService.login()`, `JwtHelperService`, décodage des rôles, `Login` |
 | Angular **17** | Token Interceptor | `token.interceptor.ts`, `provideHttpClient(withInterceptors([...]))` |
+| TP **2025** | Inscription + validation d'email | `RegistrationRequest`, `VerificationToken`, `EmailService`, `RegistrationController`, `register/`, `verifEmail/`, Toastr |
 
 Le compte rendu détaillé est dans [`COMPTE-RENDU-TP.md`](./COMPTE-RENDU-TP.md).
 
@@ -247,8 +271,26 @@ Pour repartir de zéro :
 
 ## 8. Vérifications effectuées
 
-- `.\mvnw.cmd test` → **20 tests, 0 échec, 0 erreur**.
+- `.\mvnw.cmd test` → **25 tests, 0 échec, 0 erreur** (20 tests initiaux + 5 tests du flux d'inscription).
 - `npm.cmd run build` → build Angular de production OK.
 - `POST /login` → **200** avec token ; sans token les API répondent **401** ; avec un token invalide **401** ; un `USER` sur une écriture répond **403**.
 - Avec un token `ADMIN`, tous les endpoints ci-dessus répondent **HTTP 200** (contrôleurs + Spring Data REST).
+- Inscription : `POST /register` → **200** avec `enabled:false` et rôle `USER` ; login avant validation → **403** ; `GET /verifyEmail/{code}` → **200** et `enabled:true` ; login après validation → **200**.
+- Doublon email → **400** `USER_EMAIL_ALREADY_EXISTS` ; code inconnu → **404** `INVALID_TOKEN` ; champs invalides → **400**.
 - Backend et frontend ont été laissés démarrés sur les ports **8080** et **4200**.
+
+## 9. Recevoir vraiment le code par email
+
+Par défaut, le backend affiche le code dans sa console (`[MODE DEMO] SMTP non configure`).
+Pour envoyer un vrai email (Gmail par exemple), définir avant le démarrage :
+
+```powershell
+$env:MAIL_USERNAME = "votre-adresse@gmail.com"
+$env:MAIL_PASSWORD = "votre-mot-de-passe-d-application"
+$env:MAIL_FROM = "votre-adresse@gmail.com"
+cd C:\Users\Dell\JoueursEquipes\backend
+.\mvnw.cmd spring-boot:run
+```
+
+`MAIL_HOST`, `MAIL_PORT`, `MAIL_SMTP_AUTH` et `MAIL_STARTTLS` sont aussi surchargeables dans
+`application.properties`. Sans ces variables, le flux reste testable avec le code affiché en console.

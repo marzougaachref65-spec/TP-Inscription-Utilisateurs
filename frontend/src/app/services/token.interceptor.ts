@@ -3,13 +3,18 @@ import { inject } from '@angular/core';
 
 import { AuthService } from './auth.service';
 
-// Atelier 17 : ajouter automatiquement "Authorization: Bearer <jwt>" a chaque appel.
+// Atelier 17 + TP 2025 : ajouter "Authorization: Bearer <jwt>" sauf sur
+// les endpoints publics (login, inscription, verification de l'email).
+const excludeArray: string[] = ['/login', '/register', '/verifyEmail'];
+
+function toExclude(url: string): boolean {
+  return excludeArray.some((fragment) => url.includes(fragment));
+}
+
 export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
-  const toExclude = '/login';
 
-  // Pas de token sur la requete de login : c'est elle qui le genere.
-  if (req.url.includes(toExclude)) {
+  if (toExclude(req.url)) {
     return next(req);
   }
 

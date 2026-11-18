@@ -35,6 +35,10 @@ public class User {
 	@Column(unique = true, nullable = false)
 	private String username;
 
+	// TP 2025 : inscription — l'email sert d'identifiant de validation.
+	@Column(unique = true)
+	private String email;
+
 	// Atelier 13 : le mot de passe est lu depuis le corps /login mais jamais
 	// renvoye dans les reponses JSON (WRITE_ONLY).
 	@JsonProperty(access = Access.WRITE_ONLY)

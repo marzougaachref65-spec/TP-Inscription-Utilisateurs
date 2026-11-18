@@ -18,7 +18,13 @@ export class App implements OnInit {
   ngOnInit(): void {
     // Atelier 16bis : on charge le JWT (et on le decode) au demarrage.
     this.authService.loadToken();
-    if (!this.authService.getToken() || this.authService.isTokenExpired()) {
+
+    // TP 2025 : les pages login / register / verifEmail restent accessibles
+    // sans token, sinon le formulaire d'inscription serait redirige.
+    const publicRoutes = ['/login', '/register', '/verifEmail'];
+    const isPublic = publicRoutes.some((route) => this.router.url.startsWith(route));
+
+    if (!isPublic && (!this.authService.getToken() || this.authService.isTokenExpired())) {
       this.router.navigate(['/login']);
     }
   }

@@ -1,8 +1,8 @@
-# Compte rendu des 17 ateliers — Spring Boot 3 + Angular 22
+# Compte rendu des 17 ateliers + TP « Inscription des Utilisateurs » — Spring Boot 3 + Angular 22
 
 **Projet :** Gestion des Joueurs, Équipes et Auteurs  
 **Dossier :** `C:\Users\Dell\JoueursEquipes`  
-**Ateliers couverts :** Spring Boot **01, 02, 03, 13, 14, 15** et Angular **01, 02, 03, 04, 05, 07, 08, 09, 16, 16bis, 17**  
+**Ateliers couverts :** Spring Boot **01, 02, 03, 13, 14, 15** et Angular **01, 02, 03, 04, 05, 07, 08, 09, 16, 16bis, 17** + TP 2025 **Inscription des Utilisateurs**  
 **Adaptation demandée :** les entités `Produit` / `Categorie` / `Jouet` des énoncés sont remplacées par **Joueur**, **Equipe** et **Auteur** (l'Auteur étant lié au Joueur).
 
 | Élément | Version |
@@ -451,7 +451,7 @@ automatiquement de l'en-tête sans modification de leurs appels.
 
 | Vérification | Résultat |
 |---|---|
-| `.\mvnw.cmd test` | **20 tests, 0 failure, 0 error** |
+| `.\mvnw.cmd test` | **25 tests, 0 failure, 0 error** |
 | `.\mvnw.cmd -DskipTests package` | JAR généré : `target/joueurs-equipes-0.0.1-SNAPSHOT.jar` |
 | `npm.cmd run build` | Build Angular de production OK |
 | Endpoints REST classiques | HTTP 200 avec un token `ADMIN` |
@@ -483,3 +483,74 @@ Connexion JWT : `admin / 123` pour administrer, `joueur / 123` pour consulter.
 Le token est automatiquement ajouté à chaque requête par le `tokenInterceptor`.
 
 **Résultat : les 17 ateliers sont intégrés dans un seul projet cohérent avec les trois entités demandées.**
+
+---
+
+# Partie IV — TP 2025 : Inscription des Utilisateurs
+
+## Objectifs réalisés
+
+1. Formulaire Angular `/register` avec validation : nom obligatoire, email valide,
+   mot de passe ≥ 6 caractères et confirmation identique.
+2. API `POST /register` côté Spring Boot avec validation backend (`@Valid`).
+3. Génération d’un code secret à **6 chiffres** (`SecureRandom`, unique en base).
+4. Envoi du code par email via `spring-boot-starter-mail` (`JavaMailSender` + `MimeMessageHelper`).
+5. Expiration du code après **15 minutes** (`VerificationToken`).
+6. API `GET /verifyEmail/{code}` qui active le compte.
+7. Rôle **USER** par défaut et compte désactivé (`enabled=false`) jusqu’à validation.
+8. Gestion d’erreurs JSON (`ErrorDetails` + `errorCode`).
+9. Blocage du login tant que le compte est désactivé (**403** `errorCause=disabled`).
+10. CORS maintenu (`http://localhost:4200`, en-tête `Authorization` exposé).
+11. Notifications **Toastr** + spinner pendant l’envoi / la validation.
+
+## Fichiers ajoutés / modifiés
+
+| Côté | Fichier | Rôle |
+|---|---|---|
+| Backend | `entities/User.java` | ajout de `email` |
+| Backend | `entities/VerificationToken.java` | code + `expirationTime` (15 min) |
+| Backend | `repos/VerificationTokenRepository.java` | `findByToken`, `existsByToken` |
+| Backend | `register/RegistrationRequest.java` | DTO avec `jakarta.validation` |
+| Backend | `util/EmailSender.java`, `util/EmailService.java` | envoi SMTP / mode démo console |
+| Backend | `restcontrollers/RegistrationController.java` | `/register` et `/verifyEmail/{code}` (+ alias `/api/users/...`) |
+| Backend | `exceptions/ErrorDetails.java` + 5 exceptions | `USER_EMAIL_ALREADY_EXISTS`, `USER_USERNAME_ALREADY_EXISTS`, `INVALID_TOKEN`, `EXPIRED_TOKEN`, `EMAIL_SENDING_FAILED` |
+| Backend | `exceptions/GlobalExceptionHandler.java` | réponses JSON 400 / 403 / 404 / 500 |
+| Backend | `service/UserServiceImpl.java` | inscription, BCrypt, rôle USER, code, validation |
+| Backend | `security/SecurityConfig.java` | endpoints publics + CORS `maxAge` |
+| Backend | `security/JWTAuthenticationFilter.java` | message spécifique `DisabledException` |
+| Backend | `application.properties` | configuration SMTP et 15 minutes |
+| Backend | `src/test/.../RegistrationServiceTests.java` | 5 tests unitaires du flux |
+| Frontend | `models/user.model.ts` | ajout de `email`, `enabled` |
+| Frontend | `services/auth.service.ts` | `registerUser`, `validateEmail`, `regitredUser` |
+| Frontend | `services/token.interceptor.ts` | exclusion de `/register` et `/verifyEmail` |
+| Frontend | `register/register.ts/.html/.css` | formulaire réactif + Toastr + spinner |
+| Frontend | `verifEmail/verif-email.ts/.html/.css` | saisie du code + auto-login |
+| Frontend | `app.routes.ts`, `app.ts`, `app.html` | routes publiques et lien « S'inscrire » |
+| Frontend | `app.config.ts`, `angular.json` | `provideAnimations()`, `provideToastr()`, `toastr.css` |
+
+## API et réponses
+
+| Méthode | URL | Succès | Erreurs possibles |
+|---|---|---|---|
+| POST | `/register` | `200` + User (`enabled:false`, rôle `USER`) | `400` email/username existant, `400` validation |
+| GET | `/verifyEmail/{code}` | `200` + User (`enabled:true`) | `404 INVALID_TOKEN`, `400 EXPIRED_TOKEN` |
+| POST | `/login` (compte non activé) | — | `403 {"errorCause":"disabled"}` |
+| POST | `/login` (compte activé) | `200` + JWT | `401 bad_credentials` |
+
+## Configuration email
+
+Sans variables d’environnement, `EmailService` affiche le code dans la console du backend
+afin de garder le flux testable. Pour un envoi réel :
+
+```powershell
+$env:MAIL_USERNAME = "votre-adresse@gmail.com"
+$env:MAIL_PASSWORD = "mot-de-passe-d-application"
+$env:MAIL_FROM = "votre-adresse@gmail.com"
+```
+
+## Vérification
+
+`.\mvnw.cmd test` → **25 tests, 0 failure, 0 error**. `npm.cmd run build` → OK.
+Test HTTP complet effectué : register `200`, login avant validation `403`, code extrait du log,
+verifyEmail `200`, login après validation `200` + JWT, `GET /api/joueurs` avec le token `USER`
+`200`, `/api/users/all` `403`, doublon `400`, code invalide `404`, champs invalides `400`.

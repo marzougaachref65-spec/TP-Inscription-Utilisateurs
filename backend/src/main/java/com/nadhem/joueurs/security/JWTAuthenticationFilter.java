@@ -3,11 +3,13 @@ package com.nadhem.joueurs.security;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -73,6 +75,17 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 	@Override
 	protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
 			AuthenticationException failed) throws IOException, ServletException {
+		// TP 2025 : un compte non active ne doit pas pouvoir se connecter.
+		if (failed instanceof DisabledException) {
+			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+			response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+			response.setCharacterEncoding("UTF-8");
+			Map<String, Object> data = new HashMap<>();
+			data.put("errorCause", "disabled");
+			data.put("message", "Utilisateur désactivé, veuillez valider votre email ou contacter votre administrateur.");
+			objectMapper.writeValue(response.getWriter(), data);
+			return;
+		}
 		super.unsuccessfulAuthentication(request, response, failed);
 	}
 

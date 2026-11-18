@@ -1,0 +1,49 @@
+<div class="container mt-5">
+  <div class="row justify-content-md-center">
+    <div class="col-md-5">
+      <div class="bg-white p-4 rounded shadow-sm">
+        <h2 class="mb-3">Validation de l'email</h2>
+
+        @if (!user.username) {
+          <div class="alert alert-warning">
+            Inscrivez-vous d'abord pour recevoir le code de confirmation.
+            <a routerLink="/register">Créer un compte</a>
+          </div>
+        }
+
+        @if (err) {
+          <div class="alert alert-danger">
+            <strong>{{ err }}</strong>
+          </div>
+        }
+
+        @if (user.email) {
+          <p class="text-muted small">
+            Un code à 6 chiffres a été envoyé à <strong>{{ user.email }}</strong>.
+            Il expire après 15 minutes.
+          </p>
+        }
+
+        <form (ngSubmit)="onValidateEmail()">
+          <div class="form-group mb-3">
+            <label class="form-label">Veuillez entrer le code envoyé par mail :</label>
+            <input type="text" name="code" [(ngModel)]="code" class="form-control"
+                   maxlength="6" placeholder="Code de confirmation">
+          </div>
+
+          @if (loading) {
+            <div class="d-flex justify-content-center my-3">
+              <div class="spinner-border text-success" role="status">
+                <span class="visually-hidden">Validation en cours...</span>
+              </div>
+            </div>
+          }
+
+          <button type="submit" class="btn btn-success w-100" [disabled]="loading || !user.username">
+            S'inscrire
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

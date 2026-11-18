@@ -46,6 +46,12 @@
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
 
+		<!-- Inscription : envoi du code de validation par email (SMTP) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+
 		<!-- Spring Security + JWT (Ateliers 13, 14 et 15) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

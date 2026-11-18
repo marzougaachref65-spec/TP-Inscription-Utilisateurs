@@ -10,8 +10,10 @@ import { JoueurForm } from './joueurs/joueur-form';
 import { JoueurList } from './joueurs/joueur-list';
 import { Forbidden } from './forbidden/forbidden';
 import { Login } from './login/login';
+import { Register } from './register/register';
 import { RechercheParCategorie } from './recherche/recherche-par-categorie';
 import { RechercheParNom } from './recherche/recherche-par-nom';
+import { VerifEmail } from './verifEmail/verif-email';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'joueurs', pathMatch: 'full' },
@@ -39,4 +41,8 @@ export const routes: Routes = [
   // Atelier 16 : authentification et droits
   { path: 'login', component: Login },
   { path: 'app-forbidden', component: Forbidden },
+
+  // TP 2025 : inscription et validation de l'email
+  { path: 'register', component: Register },
+  { path: 'verifEmail', component: VerifEmail },
 ];

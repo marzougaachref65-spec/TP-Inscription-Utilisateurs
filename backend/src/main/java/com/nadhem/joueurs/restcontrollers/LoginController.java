@@ -34,7 +34,7 @@ public class LoginController {
 	}
 
 	@PostMapping("/login")
-	public ResponseEntity<?> login(@RequestBody Map<String, String> credentials) {
+	public ResponseEntity<?> login(@RequestBody Map<String, String> credentials) throws Exception {
 		String username = credentials.get("username");
 		String password = credentials.get("password");
 		if (username == null || password == null) {

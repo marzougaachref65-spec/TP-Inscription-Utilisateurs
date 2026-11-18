@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { User } from '../models/user.model';
 
-// Ateliers 13-16bis : authentification JWT cote client.
+// Ateliers 13-16bis + TP 2025 : authentification et inscription cote client.
 @Injectable({ providedIn: 'root' })
 export class AuthService {
 
@@ -17,6 +17,9 @@ export class AuthService {
   public isloggedIn: Boolean = false;
   public roles!: string[];
 
+  // TP 2025 : utilisateur venant d'etre inscrit, utilise par verifEmail.
+  public regitredUser: User = new User();
+
   constructor(private router: Router, private http: HttpClient) {
     this.loadToken();
   }
@@ -24,6 +27,24 @@ export class AuthService {
   // Atelier 16bis : recuperer le token depuis POST /login
   login(user: User): Observable<HttpResponse<any>> {
     return this.http.post<any>(`${environment.authURL}/login`, user, { observe: 'response' });
+  }
+
+  // TP 2025 : creer le compte (desactive) et envoyer le code par email.
+  registerUser(user: User): Observable<HttpResponse<any>> {
+    return this.http.post<any>(`${environment.authURL}/register`, user, { observe: 'response' });
+  }
+
+  // TP 2025 : valider le code a 6 chiffres recu par email.
+  validateEmail(code: string): Observable<User> {
+    return this.http.get<User>(`${environment.authURL}/verifyEmail/${code}`);
+  }
+
+  setRegistredUser(user: User): void {
+    this.regitredUser = user;
+  }
+
+  getRegistredUser(): User {
+    return this.regitredUser;
   }
 
   saveToken(jwt: string): void {

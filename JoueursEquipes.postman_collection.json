@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "JoueursEquipes - Ateliers Spring Boot & Angular",
-    "description": "Collection prete a importer dans Postman. Base : http://localhost:8080/joueurs. Entites : Joueur, Equipe, Auteur. Forte authentification JWT : lancer d'abord '00 - Login JWT' (admin/123), le token est stocke dans la variable jwtToken.",
+    "description": "Collection prete a importer dans Postman. Base : http://localhost:8080/joueurs. Entites : Joueur, Equipe, Auteur. JWT : lancer d'abord '00 - Login JWT' (admin/123). TP 2025 : dossier 'Inscription & verification email' (code a 6 chiffres valable 15 min, variable verificationCode).",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -10,7 +10,9 @@
     { "key": "restJoueurs", "value": "{{baseUrl}}/restJoueurs" },
     { "key": "restEquipes", "value": "{{baseUrl}}/restEquipes" },
     { "key": "restAuteurs", "value": "{{baseUrl}}/restAuteurs" },
-    { "key": "jwtToken", "value": "" }
+    { "key": "jwtToken", "value": "" },
+    { "key": "registrationEmail", "value": "nouveau@joueurs.local" },
+    { "key": "verificationCode", "value": "" }
   ],
   "auth": {
     "type": "bearer",
@@ -65,6 +67,96 @@
           }
         },
         { "name": "Users/all - reserve ADMIN (Atelier 14)", "request": { "method": "GET", "header": [], "url": "{{apiUrl}}/users/all" } }
+      ]
+    },
+    {
+      "name": "00b - Inscription & verification email (TP 2025)",
+      "description": "Flux public : register -> code par email -> verifyEmail -> login. Sans SMTP configure, le code est affiche dans la console du backend.",
+      "item": [
+        {
+          "name": "1. Register (compte desactive, role USER)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "auth": { "type": "noauth" },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"nouveau\",\n  \"email\": \"{{registrationEmail}}\",\n  \"password\": \"secret123\"\n}"
+            },
+            "url": "{{baseUrl}}/register"
+          }
+        },
+        {
+          "name": "2. Login AVANT validation (403 disabled)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "auth": { "type": "noauth" },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"nouveau\",\n  \"password\": \"secret123\"\n}"
+            },
+            "url": "{{baseUrl}}/login"
+          }
+        },
+        {
+          "name": "3. VerifyEmail (mettre verificationCode = code recu)",
+          "description": "Remplacer la variable verificationCode par le code a 6 chiffres affiche dans la console backend (ou recu par email).",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 400 && pm.response.json().errorCode === 'EXPIRED_TOKEN') {",
+                  "    console.log('Code expire : refaire un register avec un autre email');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": { "type": "noauth" },
+            "url": "{{baseUrl}}/verifyEmail/{{verificationCode}}"
+          }
+        },
+        {
+          "name": "4. Login APRES validation (200 + JWT)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "auth": { "type": "noauth" },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"nouveau\",\n  \"password\": \"secret123\"\n}"
+            },
+            "url": "{{baseUrl}}/login"
+          }
+        },
+        {
+          "name": "5. Register avec un email deja utilise (400)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "auth": { "type": "noauth" },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"autre\",\n  \"email\": \"{{registrationEmail}}\",\n  \"password\": \"secret123\"\n}"
+            },
+            "url": "{{baseUrl}}/register"
+          }
+        },
+        {
+          "name": "6. VerifyEmail avec un code invalide (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": { "type": "noauth" },
+            "url": "{{baseUrl}}/verifyEmail/000000"
+          }
+        }
       ]
     },
     {

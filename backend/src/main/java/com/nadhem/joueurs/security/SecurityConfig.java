@@ -39,11 +39,18 @@ public class SecurityConfig {
 				config.setAllowedHeaders(List.of("*"));
 				config.setExposedHeaders(List.of("Authorization"));
 				config.setAllowCredentials(true);
+				config.setMaxAge(3600L);
 				return config;
 			}))
 			.authorizeHttpRequests(requests -> requests
 				.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 				.requestMatchers(SecParams.LOGIN_URL, SecParams.LOGIN_URL_WITH_CONTEXT).permitAll()
+
+				// TP 2025 : inscription et validation de l'email sont publiques.
+				.requestMatchers(HttpMethod.POST,
+					"/register", "/joueurs/register", "/api/users/register").permitAll()
+				.requestMatchers(HttpMethod.GET,
+					"/verifyEmail/**", "/joueurs/verifyEmail/**", "/api/users/verifyEmail/**").permitAll()
 
 				// Lecture : ADMIN et USER
 				.requestMatchers(HttpMethod.GET,
